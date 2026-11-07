@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Бронкс">
+  <rect width="64" height="64" rx="10" fill="#08080A"/>
+  <path d="M0 46 L64 30 L64 46 Z" fill="#E11D2E"/>
+  <path d="M0 54 L64 44 L64 54 Z" fill="#E11D2E" opacity="0.55"/>
+  <text x="32" y="38" text-anchor="middle" font-family="Impact, 'Arial Narrow', sans-serif" font-size="34" font-weight="700" fill="#F4F4F5">B</text>
+</svg>

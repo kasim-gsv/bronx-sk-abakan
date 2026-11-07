@@ -1,36 +1,149 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Бойцовский клуб «Бронкс» — сайт
 
-## Getting Started
+Сайт клуба единоборств в Абакане: ММА, бокс, БЖЖ и грэпплинг, борьба,
+рукопашный бой, кикбоксинг, дзюдо, чирлидинг.
 
-First, run the development server:
+Стек: **Next.js 16 (App Router) + TypeScript + Tailwind CSS 4**, сборка через
+Turbopack. Лендинг статический, заявки уходят в Telegram-бот.
+
+## Команды
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install          # один раз
+npm run dev          # http://localhost:3000 — разработка
+npm run typecheck    # проверка типов (tsc --noEmit)
+npm run lint         # ESLint
+npm run build        # production-сборка (prebuild сначала запускает tsc)
+npm start            # запуск собранного сайта
+npm run seed         # демо-занятия при SEED_DEMO=1 и пустой базе
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Деплой и превью для клуба — в [DEPLOY.md](DEPLOY.md): Render, Docker, VPS,
+переменные окружения и чек-лист перед запуском.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Проверка типов вынесена из `next build` (см. комментарий в `next.config.ts`):
+`npm run build` вызывает `prebuild` → `tsc --noEmit`, поэтому ошибки типов
+по-прежнему блокируют сборку.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Где править контент
 
-## Learn More
+Почти весь текст и данные — в одном файле: **`src/content/club.ts`**.
+Вёрстку трогать не нужно.
 
-To learn more about Next.js, take a look at the following resources:
+| Что менять | Где в `club.ts` |
+| --- | --- |
+| Телефон, адреса, график | `club.phone`, `club.venues`, `club.hours` |
+| Ссылки на соцсети и мессенджеры | `club.links` |
+| Рейтинг из каталога | `club.rating` |
+| Направления | `directions` |
+| Расписание занятий | `schedule` — заполнить поле `time` |
+| Цены | `prices` |
+| Тренеры | `coaches` |
+| Вопросы-ответы | `faq` |
+| Список направлений в форме | `leadDirections` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Секции сайта лежат в `src/components/`, страница собирается в `src/app/page.tsx`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Заявки → Telegram
 
-## Deploy on Vercel
+1. Создайте бота у [@BotFather](https://t.me/BotFather) и получите токен.
+2. Напишите боту `/start` — иначе он не сможет присылать сообщения.
+3. Узнайте `chat_id`: `https://api.telegram.org/bot<ТОКЕН>/getUpdates`.
+4. Скопируйте `.env.local.example` в `.env.local` и заполните нужные блоки
+   (там же описаны все переменные: бот, вход через Telegram, `AUTH_SECRET`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```env
+TELEGRAM_BOT_TOKEN=123456:AA...
+TELEGRAM_CHAT_ID=123456789
+AUTH_SECRET=<случайная строка 32+ символа>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+В режиме разработки без переменных форма работает «вхолостую»: заявка пишется
+в лог сервера. В production без настроенного Telegram форма честно отвечает
+ошибкой «форма ещё не подключена», чтобы не терять заявки молча. В коде
+отправки есть honeypot и ограничение до 5 заявок с одного IP за 10 минут
+(`src/app/api/lead/route.ts`).
+
+## Личный кабинет
+
+`/account` — каркас кабинета ученика: вход, сессия, абонемент, свои заявки.
+
+- **База:** встроенный `node:sqlite` (Node 22.5+, ничего ставить не нужно).
+  Файл `data/bronx.db` создаётся сам, в git не попадает (`/data/` в `.gitignore`).
+  Схема — в `src/lib/db.ts` (таблицы `users`, `memberships`, `leads`).
+- **Сессия:** подписанный JWT в cookie `bronx_session` (HttpOnly, SameSite=Lax,
+  30 дней). Секрет — `AUTH_SECRET`, без него production-вход осознанно падает
+  с ошибкой, чтобы не подписывать сессии ключом из репозитория.
+- **Вход через Telegram:** Authorization Code + PKCE по официальному OIDC
+  (`https://oauth.telegram.org`), проверка `id_token` по JWKS. Нужно завести
+  бота и приложение Telegram Login в @BotFather → «Login Widget», затем
+  заполнить `TELEGRAM_LOGIN_CLIENT_ID` и `TELEGRAM_LOGIN_CLIENT_SECRET`.
+  Обратный адрес: `https://<домен>/api/auth/telegram/callback`.
+- **Тестовый вход:** кнопка «Тестовый вход (локально)» работает в dev-режиме и
+  создаёт служебного пользователя. В production включается только
+  `ALLOW_DEV_LOGIN=1` — перед публикацией эту переменную не задавать.
+- **Заявки:** форма сохраняет заявку в базу и привязывает её к аккаунту, если
+  пользователь вошёл. В кабинете виден список своих заявок.
+- **Выход:** кнопка «Выйти» (`POST /api/auth/logout`).
+
+Вход через VK ID пока не реализован: нужен зарегистрированный сервис VK ID.
+Структура кода готова — добавляется отдельным провайдером рядом с Telegram.
+
+## Расписание и запись на занятие
+
+- **`/schedule`** — ближайшие занятия из базы: направление, время, тренер,
+  свободные места. Если занятий нет, страница так и пишет.
+- **`/book/[id]`** — форма записи: имя, телефон, согласие. Записаться можно без
+  входа в кабинет; если человек вошёл, запись привяжется к аккаунту.
+- **`/booking/[token]`** — подтверждение записи и кнопка отмены. Ссылка
+  персональная (случайный токен), работает без входа — её и нужно сохранить.
+- **Лимит мест** проверяется и запись создаётся в одной транзакции
+  (`BEGIN IMMEDIATE`), поэтому два одновременных запроса не займут одно место.
+  Повторная запись тем же телефоном на то же занятие отсекается.
+- **Время клуба** — `Asia/Krasnoyarsk` (UTC+7), считается независимо от
+  часового пояса сервера (`src/lib/schedule.ts`).
+- Логика и таблицы `class_sessions`, `bookings` — в `src/lib/schedule.ts`
+  и `src/lib/db.ts`.
+
+## Админка
+
+`/admin` — расписание, записавшиеся, заявки, ученики.
+
+- **Доступ:** роль `ADMIN`. Проверка стоит в `src/proxy.ts` и срабатывает до
+  рендера, поэтому гость получает настоящий `307` на `/account`, а ученик —
+  на главную. Дополнительно роль перепроверяется в каждом серверном действии.
+- **Как стать админом:** локально — тестовый вход (он сразу администратор),
+  в бою — `ADMIN_TELEGRAM_IDS` со списком Telegram ID через запятую. Роль
+  записывается в подписанный токен, поэтому после смены роли нужно войти заново.
+- **Что можно делать:** добавить занятие (направление, дата, время,
+  длительность, места, заметка), отменить или удалить занятие, отметить
+  «пришёл» / «неявка» / «отменить» для каждой записи, смотреть заявки и
+  переключать роли учеников.
+- Свою роль снять нельзя — чтобы случайно не остаться без админки.
+
+## Что ещё не заполнено (ждёт данных от клуба)
+
+- **Фотографии** — в Hero и блоке «Зал» стоят аккуратные заглушки, а не чужие
+  картинки. Пришлите 8–12 снимков (зал, тренировки, соревнования) — заменю.
+- **Логотип и фирменные цвета** — сейчас тёмная палитра с красным акцентом;
+  после логотипа достаточно поменять `--color-brand` в `src/app/globals.css`.
+- **Расписание** — в таблице «уточняется» вместо выдуманных часов.
+- **Цены** — подтверждена только персональная тренировка «от 2 000 ₽» (по
+  данным каталога Zoon), остальные позиции помечены как уточняемые.
+- **Тренеры** — карточки-заглушки: нужны имена, направления, регалии, фото.
+- **Второй адрес** (Калинино, 50 лет Победы, 16А) — указан как второй зал, но
+  требует подтверждения.
+- **Политика ПД** — на `/privacy` лежит шаблон; перед публикацией нужны
+  реквизиты оператора (ИП/ООО, ИНН, адрес).
+
+## Этапы проекта
+
+1. ✅ Каркас, лендинг, адаптив, SEO-мета, JSON-LD, заявки в Telegram.
+2. ⬜ Контент-слой: заполнить расписание/цены/тренеров реальными данными.
+3. 🟡 Личный кабинет: база, сессия и вход через Telegram готовы; осталось
+   подключить бота (env) и добавить вход через VK ID.
+4. ✅ Запись на занятие с лимитом мест, отмена по ссылке, админка
+   (расписание, записи, заявки, ученики).
+5. ⬜ Онлайн-оплата (нужен ИП/ООО и договор эквайринга).
+6. ⬜ Деплой, домен, Метрика, финальные документы по 152-ФЗ.

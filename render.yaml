@@ -1,0 +1,39 @@
+# Превью на Render (бесплатный план)
+# Документация: https://render.com/docs/blueprint-spec
+#
+# Важно: на free-плане диск эфемерный — база SQLite и заявки живут до
+# перезапуска/редеплоя. Для показа владельцу этого достаточно; для настоящего
+# запуска нужен платный диск или VPS (см. DEPLOY.md).
+services:
+  - type: web
+    name: bronx-preview
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Секрет сессий Render сгенерирует сам.
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: DATABASE_PATH
+        value: "./data/bronx.db"
+      # Демо-занятия, чтобы расписание не было пустым. Перед запуском в клуб
+      # убрать эту переменную.
+      - key: SEED_DEMO
+        value: "1"
+      # Адрес сайта — вписать после первого деплоя (https://<имя>.onrender.com)
+      # или свой домен. Влияет на canonical, sitemap и OG-теги.
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      # Тестовый вход в админку. Включать только для закрытого превью:
+      # любой, у кого ссылка, станет администратором.
+      - key: ALLOW_DEV_LOGIN
+        value: "0"
+      # Заявки в Telegram (можно оставить пустыми — заявки сохранятся в базе).
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false

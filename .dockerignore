@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+data
+.env*
+.screens
+.edge-profile*
+.npm-cache
+.tmp-appdata
+.tmp-localappdata
+*.log
+.qa-*
