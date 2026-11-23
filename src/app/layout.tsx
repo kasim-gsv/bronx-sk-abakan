@@ -60,7 +60,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ru" className={`${oswald.variable} ${inter.variable}`}>
+    // data-scroll-behavior: при client-side переходах Next делает прокрутку
+    // мгновенной (иначе плавный скролл из globals.css оставляет новую страницу
+    // на сохранённой позиции), а для якорей остаётся плавность.
+    <html
+      lang="ru"
+      data-scroll-behavior="smooth"
+      className={`${oswald.variable} ${inter.variable}`}
+    >
       <body>{children}</body>
     </html>
   );
