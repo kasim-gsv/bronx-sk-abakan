@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { club } from "@/content/club";
 
 export function MobileActionBar() {
@@ -18,12 +19,12 @@ export function MobileActionBar() {
         >
           WhatsApp
         </a>
-        <a
-          href="#lead"
+        <Link
+          href="/#lead"
           className="flex h-11 items-center justify-center rounded-sm bg-brand text-[0.7rem] font-medium uppercase tracking-[0.12em] text-white"
         >
           Записаться
-        </a>
+        </Link>
       </div>
     </div>
   );

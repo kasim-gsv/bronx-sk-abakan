@@ -2,12 +2,16 @@ import Link from "next/link";
 import { club } from "@/content/club";
 import { Container } from "@/components/ui";
 
+/**
+ * Ссылки на разделы главной — с полным путём (`/#...`), иначе на внутренних
+ * страницах (/schedule, /account, /admin) якорь некуда прокручивать.
+ */
 const navigation = [
-  { href: "#directions", label: "Направления" },
-  { href: "#prices", label: "Цены" },
+  { href: "/#directions", label: "Направления" },
+  { href: "/#prices", label: "Цены" },
   { href: "/schedule", label: "Расписание" },
-  { href: "#coaches", label: "Тренеры" },
-  { href: "#contacts", label: "Контакты" },
+  { href: "/#coaches", label: "Тренеры" },
+  { href: "/#contacts", label: "Контакты" },
   { href: "/account", label: "Кабинет" },
 ];
 
@@ -28,12 +32,12 @@ export function SiteHeader() {
           <ul className="flex items-center gap-5 xl:gap-7">
             {navigation.map((item) => (
               <li key={item.href}>
-                <a
+                <Link
                   href={item.href}
                   className="whitespace-nowrap text-[0.82rem] text-muted transition-colors hover:text-paper xl:text-sm"
                 >
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -46,9 +50,9 @@ export function SiteHeader() {
           >
             {club.phone.display}
           </a>
-          <a href="#lead" className="btn btn-primary hidden sm:inline-flex">
+          <Link href="/#lead" className="btn btn-primary hidden sm:inline-flex">
             Записаться
-          </a>
+          </Link>
         </div>
       </Container>
     </header>

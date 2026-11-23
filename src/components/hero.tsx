@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { club } from "@/content/club";
 import { Container } from "@/components/ui";
 
@@ -37,9 +38,9 @@ export function Hero() {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a href="#lead" className="btn btn-primary">
+            <Link href="/#lead" className="btn btn-primary">
               Записаться на тренировку
-            </a>
+            </Link>
             <a href={`tel:${club.phone.tel}`} className="btn btn-ghost">
               {club.phone.display}
             </a>
