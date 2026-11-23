@@ -52,3 +52,6 @@ next-env.d.ts
 /.screens/
 /.edge*/
 
+
+# временные QA-скрипты
+/.qa-*
