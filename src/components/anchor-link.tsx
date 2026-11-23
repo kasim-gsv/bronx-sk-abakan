@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 function smoothBehavior() {
@@ -16,6 +15,10 @@ function smoothBehavior() {
  * Если цель на другой странице — обычный next/link: он перейдёт и прокрутит
  * к якорю. Если мы уже на этой странице, маршрут не меняется и Next.js ничего
  * не делает, поэтому прокручиваем вручную.
+ *
+ * `usePathname()` здесь намеренно не используется: шапка рендерится и на
+ * статически пререндеренных страницах, а чтение URL на этапе рендера ломает
+ * пререндер. Путь читаем из window только в обработчике клика.
  */
 export function AnchorLink({
   href,
@@ -28,13 +31,14 @@ export function AnchorLink({
   children: ReactNode;
   onNavigate?: () => void;
 }) {
-  const pathname = usePathname();
-  const [path, hash] = href.split("#");
-
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     onNavigate?.();
 
-    if (!hash || pathname !== (path || "/")) return;
+    const [path, hash] = href.split("#");
+    if (!hash) return;
+
+    const targetPath = path || "/";
+    if (window.location.pathname !== targetPath) return;
 
     const target = document.getElementById(hash);
     if (!target) return;
@@ -61,14 +65,12 @@ export function HomeLink({
   className?: string;
   children: ReactNode;
 }) {
-  const pathname = usePathname();
-
   return (
     <Link
       href={href}
       className={className}
       onClick={(event) => {
-        if (pathname !== href) return;
+        if (window.location.pathname !== href) return;
 
         event.preventDefault();
 
