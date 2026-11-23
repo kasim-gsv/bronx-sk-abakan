@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { club } from "@/content/club";
+import { AnchorLink } from "@/components/anchor-link";
 
 export function MobileActionBar() {
   return (
@@ -19,12 +19,12 @@ export function MobileActionBar() {
         >
           WhatsApp
         </a>
-        <Link
+        <AnchorLink
           href="/#lead"
           className="flex h-11 items-center justify-center rounded-sm bg-brand text-[0.7rem] font-medium uppercase tracking-[0.12em] text-white"
         >
           Записаться
-        </Link>
+        </AnchorLink>
       </div>
     </div>
   );

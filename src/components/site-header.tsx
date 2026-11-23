@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { club } from "@/content/club";
 import { Container } from "@/components/ui";
+import { AnchorLink, HomeLink } from "@/components/anchor-link";
 
 /**
  * Ссылки на разделы главной — с полным путём (`/#...`), иначе на внутренних
@@ -19,25 +20,34 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-ink/80 backdrop-blur-md">
       <Container className="flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="group flex items-baseline gap-3">
+        <HomeLink className="group flex items-baseline gap-3">
           <span className="heading-display text-2xl tracking-[0.06em] text-paper">
             {club.latinName}
           </span>
           <span className="hidden text-[0.65rem] font-medium uppercase tracking-[0.22em] text-muted group-hover:text-paper/80 sm:inline">
             {club.city} · единоборства
           </span>
-        </Link>
+        </HomeLink>
 
         <nav aria-label="Основная навигация" className="hidden lg:block">
           <ul className="flex items-center gap-5 xl:gap-7">
             {navigation.map((item) => (
               <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="whitespace-nowrap text-[0.82rem] text-muted transition-colors hover:text-paper xl:text-sm"
-                >
-                  {item.label}
-                </Link>
+                {item.href.includes("#") ? (
+                  <AnchorLink
+                    href={item.href}
+                    className="whitespace-nowrap text-[0.82rem] text-muted transition-colors hover:text-paper xl:text-sm"
+                  >
+                    {item.label}
+                  </AnchorLink>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className="whitespace-nowrap text-[0.82rem] text-muted transition-colors hover:text-paper xl:text-sm"
+                  >
+                    {item.label}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -50,9 +60,12 @@ export function SiteHeader() {
           >
             {club.phone.display}
           </a>
-          <Link href="/#lead" className="btn btn-primary hidden sm:inline-flex">
+          <AnchorLink
+            href="/#lead"
+            className="btn btn-primary hidden sm:inline-flex"
+          >
             Записаться
-          </Link>
+          </AnchorLink>
         </div>
       </Container>
     </header>

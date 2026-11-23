@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { club } from "@/content/club";
 import { Container } from "@/components/ui";
+import { AnchorLink } from "@/components/anchor-link";
 
 const facts = [
   { label: "Адрес", value: "Тараса Шевченко, 62А" },
@@ -38,9 +38,9 @@ export function Hero() {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/#lead" className="btn btn-primary">
+            <AnchorLink href="/#lead" className="btn btn-primary">
               Записаться на тренировку
-            </Link>
+            </AnchorLink>
             <a href={`tel:${club.phone.tel}`} className="btn btn-ghost">
               {club.phone.display}
             </a>
