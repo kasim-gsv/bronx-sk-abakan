@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { cancelBookingByToken } from "@/lib/schedule";
+import { publicUrl } from "@/lib/url";
 
 /** Отмена записи по ссылке из подтверждения (обычная HTML-форма). */
 export async function POST(request: Request) {
@@ -28,7 +29,10 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.redirect(
-    new URL(`/booking/${encodeURIComponent(token)}?cancelled=1`, request.url),
+    publicUrl(
+      request,
+      `/booking/${encodeURIComponent(token)}?cancelled=1`,
+    ),
     303,
   );
 }

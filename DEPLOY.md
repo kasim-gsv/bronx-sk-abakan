@@ -5,6 +5,14 @@
 бесплатные платформы дают **эфемерный диск**: база живёт до перезапуска.
 Для показа владельцу этого достаточно, для работы клуба — нет.
 
+## Текущее превью
+
+- Сайт: **https://bronx-preview.onrender.com**
+- Репозиторий: https://github.com/kasim-gsv/bronx-sk-abakan (публичный)
+- Сервис в Render: `bronx-preview`, план free, регион Frankfurt
+- Демо-занятия появляются из `npm run seed` в команде сборки (при пустой базе)
+- Админка на превью **выключена** (`ALLOW_DEV_LOGIN=0`), заявки копятся в базе
+
 ## Что выбрать
 
 | Платформа | Подходит для | Ограничения |
@@ -24,8 +32,8 @@
 3. В Render: **New → Blueprint**, выберите репозиторий — Render прочитает
    `render.yaml` и создаст сервис `bronx-preview`.
    Либо вручную: **New → Web Service**, runtime **Node**,
-   Build Command `npm ci --include=dev && npm run build`, Start Command
-   `npm start`.
+   Build Command `npm ci --include=dev && npm run build && npm run seed`,
+   Start Command `npm start`.
 4. На **первом** деплое сразу задайте переменные (Render передаёт их и в сборку,
    и в рантайм — `NEXT_PUBLIC_SITE_URL` нужен именно на этапе сборки, иначе
    canonical и sitemap запекутся с `localhost`):

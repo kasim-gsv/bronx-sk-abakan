@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { isTelegramLoginConfigured } from "@/lib/auth";
+import { publicUrl } from "@/lib/url";
 
 /**
  * Шаг 1 входа через Telegram: Authorization Code + PKCE.
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
 
   const redirectUri =
     process.env.TELEGRAM_LOGIN_REDIRECT_URI ??
-    new URL("/api/auth/telegram/callback", request.url).toString();
+    publicUrl(request, "/api/auth/telegram/callback").toString();
 
   const authorizeUrl = new URL("https://oauth.telegram.org/auth");
   authorizeUrl.searchParams.set("client_id", clientId);

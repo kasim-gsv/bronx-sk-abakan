@@ -5,6 +5,7 @@ import {
   sessionCookieOptions,
 } from "@/lib/auth";
 import { getOrCreateDevUser } from "@/lib/db";
+import { publicUrl } from "@/lib/url";
 
 /**
  * Локальный вход без Telegram. Нужен, чтобы проверять кабинет до того, как
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
   const user = getOrCreateDevUser();
   const token = await createSessionToken(user.id, user.role);
 
-  const response = NextResponse.redirect(new URL("/account", request.url), 303);
+  const response = NextResponse.redirect(publicUrl(request, "/account"), 303);
   response.cookies.set({ ...sessionCookieOptions(), value: token });
   return response;
 }

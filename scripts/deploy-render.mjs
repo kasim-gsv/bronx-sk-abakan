@@ -75,7 +75,8 @@ if (!service) {
         plan: "free",
         region: "frankfurt",
         envSpecificDetails: {
-          buildCommand: "npm ci --include=dev && npm run build",
+          buildCommand:
+            "npm ci --include=dev && npm run build && npm run seed",
           startCommand: "npm start",
         },
       },
@@ -131,7 +132,15 @@ const deploy = await api(`/services/${service.id}/deploys`, {
   method: "POST",
   body: JSON.stringify({ clearCache: "do_not_clear" }),
 });
-const deployId = deploy.id ?? deploy.deploy?.id;
+
+// Render иногда отвечает 201 с пустым телом — тогда берём свежий деплой списком.
+let deployId = deploy?.id ?? deploy?.deploy?.id;
+if (!deployId) {
+  const latest = await api(`/services/${service.id}/deploys?limit=1`);
+  deployId = latest?.[0]?.deploy?.id;
+}
+if (!deployId) throw new Error("Не удалось определить id запущенной сборки");
+
 console.log(`[deploy] сборка запущена: ${deployId}`);
 
 let status = "created";

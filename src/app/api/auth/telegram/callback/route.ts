@@ -7,6 +7,7 @@ import {
 } from "@/lib/auth";
 import { getUserById, upsertTelegramUser } from "@/lib/db";
 import { setUserRole } from "@/lib/schedule";
+import { publicUrl } from "@/lib/url";
 
 const ISSUER = "https://oauth.telegram.org";
 const JWKS = createRemoteJWKSet(
@@ -22,7 +23,7 @@ type TelegramClaims = {
 };
 
 function fail(request: NextRequest, code: string) {
-  const url = new URL("/account", request.url);
+  const url = publicUrl(request, "/account");
   url.searchParams.set("error", code);
   return NextResponse.redirect(url, 303);
 }
@@ -120,7 +121,10 @@ export async function GET(request: NextRequest) {
 
   const finalUser = getUserById(user.id) ?? user;
   const token = await createSessionToken(finalUser.id, finalUser.role);
-  const response = NextResponse.redirect(new URL("/account", request.url), 303);
+  const response = NextResponse.redirect(
+    publicUrl(request, "/account"),
+    303,
+  );
   response.cookies.set({ ...sessionCookieOptions(), value: token });
 
   for (const name of [
