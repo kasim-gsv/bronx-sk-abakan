@@ -50,5 +50,5 @@ next-env.d.ts
 /.tmp-appdata/
 /.tmp-localappdata/
 /.screens/
-/.edge-profile*/
+/.edge*/
 
